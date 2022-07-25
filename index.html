@@ -5,6 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"
       integrity="sha512-dw+7hmxlGiOvY3mCnzrPT5yoUwN/MRjVgYV7HGXqsiXnZeqsw1H9n9lsnnPu4kL2nx2bnrjFcuWK+P3lshekwQ=="
@@ -12,17 +17,70 @@
       referrerpolicy="no-referrer"
     ></script>
     <script src="//mozilla.github.io/pdf.js/build/pdf.js"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.slim.min.js"
+      integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI="
+      crossorigin="anonymous"
+    ></script>
     <style>
+      * {
+        margin: 0px;
+        padding: 0px;
+        box-sizing: border-box;
+      }
       body {
+        position: relative;
         width: 100%;
+        min-height: 100vh;
+        background-color: #2c3333;
       }
       canvas {
         direction: ltr;
         margin: 0 auto;
         display: block;
       }
+      .swiper {
+      }
+      .swiper-slide {
+        margin: 0 auto;
+        background: #395b64;
+      }
+      .loading {
+        z-index: 9999;
+        width: 100vw;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #a5c9ca;
+        background-image: url("./loading.gif");
+        background-repeat: no-repeat;
+        background-size: 50px;
+        background-position: center;
+      }
     </style>
-    <script defer>
+  </head>
+  <body>
+    <!-- Slider main container -->
+    <div class="swiper">
+      <!-- Additional required wrapper -->
+      <div class="swiper-wrapper">
+        <!-- Slides -->
+      </div>
+      <!-- If we need pagination -->
+      <!-- <div class="swiper-pagination"></div> -->
+
+      <!-- If we need navigation buttons -->
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+
+      <!-- If we need scrollbar -->
+      <!-- <div class="swiper-scrollbar"></div> -->
+    </div>
+    <div class="loading"></div>
+    <script>
       // If absolute URL from the remote server is provided, configure the CORS
       // header on that server.
       var url =
@@ -41,7 +99,7 @@
         pageNum = 1,
         pageRendering = false,
         pageNumPending = null,
-        scale = 1.2,
+        scale = 1,
         cntOfPages = 0;
       /**
        * Get page info from document, resize canvas accordingly, and render page.
@@ -49,8 +107,13 @@
        * @param _canvas canvas obj.
        */
       async function renderPage(num) {
+        let slideDiv = document.createElement("div");
         let _canvas = document.createElement("canvas");
-        document.body.append(_canvas);
+
+        slideDiv.className = "swiper-slide";
+        slideDiv.append(_canvas);
+        document.getElementsByClassName("swiper-wrapper")[0].append(slideDiv);
+
         ctx = _canvas.getContext("2d");
         pageRendering = true;
         // Using promise to fetch the page
@@ -71,6 +134,9 @@
         renderTask.promise.then(function () {
           if (num + 1 <= cntOfPages) {
             renderPage(num + 1);
+          } else {
+            $(".loading").hide();
+            createSlide();
           }
         });
       }
@@ -83,7 +149,31 @@
         cntOfPages = pdfDoc.numPages;
         renderPage(1);
       });
+
+      function createSlide() {
+        const swiper = new Swiper(".swiper", {
+          // Optional parameters
+          direction: "horizontal",
+          loop: true,
+          effect: "cube",
+
+          // If we need pagination
+          // pagination: {
+          //   el: ".swiper-pagination",
+          // },
+
+          // Navigation arrows
+          navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+          },
+
+          // And if we need scrollbar
+          // scrollbar: {
+          //   el: ".swiper-scrollbar",
+          // },
+        });
+      }
     </script>
-  </head>
-  <body></body>
+  </body>
 </html>
