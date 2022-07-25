@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.min.js"
+      integrity="sha512-dw+7hmxlGiOvY3mCnzrPT5yoUwN/MRjVgYV7HGXqsiXnZeqsw1H9n9lsnnPu4kL2nx2bnrjFcuWK+P3lshekwQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="//mozilla.github.io/pdf.js/build/pdf.js"></script>
+    <style>
+      body {
+        width: 100%;
+      }
+      canvas {
+        direction: ltr;
+        margin: 0 auto;
+        display: block;
+      }
+    </style>
+    <script defer>
+      // If absolute URL from the remote server is provided, configure the CORS
+      // header on that server.
+      var url =
+        // "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/examples/learning/helloworld.pdf";
+        "test.pdf";
+      // "[공개용]제3회 1소-김상열.pdf";
+
+      // Loaded via <script> tag, create shortcut to access PDF.js exports.
+      var pdfjsLib = window["pdfjs-dist/build/pdf"];
+
+      // The workerSrc property shall be specified.
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "//mozilla.github.io/pdf.js/build/pdf.worker.js";
+
+      var pdfDoc = null,
+        pageNum = 1,
+        pageRendering = false,
+        pageNumPending = null,
+        scale = 1.2,
+        cntOfPages = 0;
+      /**
+       * Get page info from document, resize canvas accordingly, and render page.
+       * @param num Page number.
+       * @param _canvas canvas obj.
+       */
+      async function renderPage(num) {
+        let _canvas = document.createElement("canvas");
+        document.body.append(_canvas);
+        ctx = _canvas.getContext("2d");
+        pageRendering = true;
+        // Using promise to fetch the page
+        const page = await pdfDoc.getPage(num);
+        let viewPort = page.getViewport({ scale: scale });
+
+        _canvas.height = viewPort.height;
+        _canvas.width = viewPort.width;
+
+        // Render PDF page into canvas context
+        let renderContext = {
+          canvasContext: ctx,
+          viewport: viewPort,
+        };
+
+        let renderTask = page.render(renderContext);
+        // Wait for rendering to finish
+        renderTask.promise.then(function () {
+          if (num + 1 <= cntOfPages) {
+            renderPage(num + 1);
+          }
+        });
+      }
+
+      /**
+       * Asynchronously downloads PDF.
+       */
+      pdfjsLib.getDocument(url).promise.then(function (pdfDoc_) {
+        pdfDoc = pdfDoc_;
+        cntOfPages = pdfDoc.numPages;
+        renderPage(1);
+      });
+    </script>
+  </head>
+  <body></body>
+</html>
